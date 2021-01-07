@@ -361,7 +361,13 @@ public class GraphManager implements NodeListener {
     public NodeGui newNode(UnifiedMetadata metadata) {
         OperatorUI ui = OperatorUIRegistry.CreateOperatorUI(metadata.getName());
         Node node = createNode(metadata.getName());
-        this.graph.addNode(node);
+        try {
+            this.graph.addNode(node);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            NotificationManager.getInstance().error("GraphManager", "The node ID `"+node.getId()+"` exists already");
+            return null;
+        }
         Operator operator = GraphManager.getInstance().getOperator(metadata);
         assert operator != null;
         NodeGui newNode = new NodeGui(node, getConfiguration(node), metadata, ui, new OperatorContext(operator));
@@ -468,11 +474,21 @@ public class GraphManager implements NodeListener {
      * Clean up current graph.
      */
     private void clearGraph() {
+        NotificationManager.getInstance().info("GraphManager", "Clearing graph...");
         for (NodeGui n: nodes) {
             n.removeNodeListener(this);
             this.graph.removeNode(n.getName());
         }
+        if (this.graph.getNodeCount() > 0) {
+            NotificationManager.getInstance().warning("GraphManager", "something fishy when clearing graph...");
+            Node[] nodes = this.graph.getNodes();
+            for (Node node : nodes) {
+                this.graph.removeNode(node.getId());
+            }
+        }
         this.nodes.clear();
+
+        NotificationManager.getInstance().info("GraphManager", "Clearing grapn done!");
     }
 
     /***

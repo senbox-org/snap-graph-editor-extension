@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>snap-graph-editor-extension</artifactId>
-        <groupId>org.esa.snap</groupId>
-        <version>8.0.0</version>
+        <groupId>org.esa.snap.grapheditor</groupId>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>snap-graph-editor</artifactId>
@@ -61,6 +61,10 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-virtual-file-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-engine-utilities</artifactId>
         </dependency>
         <dependency>
@@ -70,7 +74,6 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-remote-execution-ui</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -96,7 +99,6 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-progress</artifactId>
-            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -114,28 +116,25 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-explorer</artifactId>
-            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-nodes</artifactId>
-            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-swing-outline</artifactId>
-            <version>${netbeans.version}</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
             <type>test-jar</type>
-        </dependency>
+        </dependency> -->
     </dependencies>
 
     <build>

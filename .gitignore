@@ -21,3 +21,6 @@ buildNumber.properties
 # Local History for Visual Studio Code
 .history/
 .project
+.classpath
+.factorypath
+.settings

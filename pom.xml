@@ -2,27 +2,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.esa.snap</groupId>
-        <artifactId>snap-desktop</artifactId>
-        <version>8.0.0</version>
-    </parent>
-
+    <groupId>org.esa.snap.grapheditor</groupId>
     <artifactId>snap-graph-editor-extension</artifactId>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>SNAP Graph Editor Project</name>
     <description>New Improved Graph Editor</description>
 
     <properties>
-        <netbeans.version>RELEASE82</netbeans.version>
-        <doc-windows.version>1.0</doc-windows.version>
+        <snap.version>9.0.0-SNAPSHOT</snap.version>
+        <s2tbx.version>9.0.0-SNAPSHOT</s2tbx.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <user.language>en</user.language>
+        <netbeans.version>RELEASE82</netbeans.version>
+        <javahelp.version>2.0.05</javahelp.version>
+        <brandingToken>snap-graph-editor</brandingToken>
     </properties>
 
     <modules>
         <module>snap-graph-editor</module>
+        <module>snap-graph-editor-kit</module>
     </modules>
 
     <dependencyManagement>
@@ -63,6 +63,24 @@
                 <artifactId>ceres-core</artifactId>
                 <version>${snap.version}</version>
             </dependency>
+    
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-product-library</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-virtual-file-system</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-remote-execution-ui</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
@@ -79,6 +97,12 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>ceres-jai</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>ceres-binding</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
@@ -154,6 +178,66 @@
             <dependency>
                 <groupId>org.netbeans.api</groupId>
                 <artifactId>org-openide-modules</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-util</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-util-lookup</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-filesystems</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-api-progress</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-awt</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-nodes</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-swing-outline</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-api-progress-nb</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-util-ui</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-explorer</artifactId>
                 <version>${netbeans.version}</version>
             </dependency>
 
@@ -244,7 +328,7 @@
 
         </dependencies>
     </dependencyManagement>
-
+    
     <repositories>
         <repository>
             <id>snap-repo-public</id>
@@ -261,34 +345,38 @@
         </repository>
     </repositories>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
                 <configuration>
-                    <aggregate>true</aggregate>
-                    <subpackages>
-                        org.esa.snap.rcp:org.esa.snap.ui:
-                    </subpackages>
-                    <!-- Not possible to exclude packages; it is not considered by the plugin -->
-                    <!--<excludePackageNames>*.internal:*.impl:com.bc.*</excludePackageNames>-->
-                    <maxmemory>512M</maxmemory>
-                    <doctitle>SNAP Desktop API</doctitle>
-                    <windowtitle>SNAP Desktop API</windowtitle>
-                    <quiet>true</quiet><!-- show only warnings and errors -->
-                    <failOnError>false</failOnError> <!-- Actually we should fix the errors -->
-                    <author>false</author>
-                    <detectJavaApiLink>true</detectJavaApiLink>
-                    <detectLinks>true</detectLinks>
-                    <links>
-                        <link>http://step.esa.int/docs/v6.0/apidoc/engine/</link>
-                    </links>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <debug>true</debug>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -314,11 +402,133 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.5.201505241946</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.1.0</version>
+                <configuration>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.basedir}/s2tbx-s2msi-reader/target/generated-sources</sourceDirectory>
+                    </sourceDirectories>
+                    <scanForSources>true</scanForSources>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.19</version>
+                <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>nbm-maven-plugin</artifactId>
+                    <version>3.14</version>
+                    <extensions>true</extensions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>javax.help</groupId>
+                            <artifactId>javahelp</artifactId>
+                            <version>${javahelp.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <moduleType>normal</moduleType>
+                        <licenseName>GPL 3</licenseName>
+                        <licenseFile>${project.basedir}/../LICENSE.html</licenseFile>
+                        <cluster>${brandingToken}</cluster>
+                        <brandingToken>${brandingToken}</brandingToken>
+                        <useOSGiDependencies>false</useOSGiDependencies>
+                        <requiresRestart>true</requiresRestart>
+                        <keystore>${project.basedir}/../keystore/snap.ks</keystore>
+                        <keystorealias>snap</keystorealias>
+                        <keystorepassword>snap-123</keystorepassword>
+                        <sourceManifestFile>target/nbm/manifest.mf</sourceManifestFile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <!-- to have the jar plugin pickup the nbm generated manifest -->
+                        <useDefaultManifestFile>true</useDefaultManifestFile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.10</version>
+                    <executions>
+                        <execution>
+                            <id>regex-property</id>
+                            <goals>
+                                <goal>regex-property</goal>
+                            </goals>
+                            <configuration>
+                                <name>project.nbmSpecVersion</name>
+                                <value>${project.version}</value>
+                                <regex>-SNAPSHOT</regex>
+                                <replacement>.0</replacement>
+                                <failIfNoMatch>false</failIfNoMatch>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.19</version>
+                    <configuration>
+                        <enableAssertions>true</enableAssertions>
+                        <!--<skip>true</skip>-->
+                        <printSummary>true</printSummary>
+                        <useFile>false</useFile>
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*Test*.java</include>
+                            <include>**/*TestCase.java</include>
+                        </includes>
+                        <systemPropertyVariables>
+                            <org.esa.snap.testdata.out>target/test-data</org.esa.snap.testdata.out>
+                            <snap.reader.tests.execute>${snap.reader.tests.execute}</snap.reader.tests.execute>
+                            <snap.reader.tests.failOnMissingData>${snap.reader.tests.failOnMissingData}</snap.reader.tests.failOnMissingData>
+                            <snap.reader.tests.data.dir>${snap.reader.tests.data.dir}</snap.reader.tests.data.dir>
+                            <snap.reader.tests.class.name>${snap.reader.tests.class.name}</snap.reader.tests.class.name>
+                        </systemPropertyVariables>
+                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8 -da:org.geotools.referencing.operation.projection.MapProjection</argLine>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
     </build>
+    <developers>
+        <developer>
+            <id>mandarancio</id>
+            <name>Martino Ferrari</name>
+            <email>martino.ferrari@c-s.fr</email>
+            <organization>CS</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+    </developers>
 </project>
