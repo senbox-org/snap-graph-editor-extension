@@ -443,10 +443,16 @@ public class NodeGui implements NodeListener, NodeInterface {
         }
         if (hasChanged && operatorUI != null) {
             Product[] products = new Product[incomingConnections.size()];
+            boolean isComplete = true;
             for (int i = 0; i < products.length; i++) {
                 products[i] = incomingConnections.get(i).getProduct();
+                if (products[i] == null) {
+                    isComplete = false;
+                }
             }
-            operatorUI.setSourceProducts(products);
+            if (products.length > 0 && isComplete) {
+                operatorUI.setSourceProducts(products);
+            }
             operatorUI.updateParameters();
             hasChanged = false;
             recomputeOutputNeeded = true;
