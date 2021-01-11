@@ -412,8 +412,14 @@ public class GraphManager implements NodeListener {
             }
         }
         for (NodeGui n: sources) {
+            NotificationManager.getInstance().info("GraphManager", n.getName() + " initialized");
             n.updateSources();
-            validate(n, true);
+            n.validate();
+        }
+        
+        if (sources.size() > 0) {
+            NotificationManager.getInstance().info("GraphManager", "validation of graph started...");
+            validate(sources.get(0));
         }
     }
 
@@ -437,6 +443,7 @@ public class GraphManager implements NodeListener {
         if (currentJob != null && !currentJob.isDone()) {
             currentJob.cancel(true);
         }
+        
         currentJob = new ValidateWorker(nodes, source, sourceFlag);
         currentJob.execute();
     }

@@ -130,6 +130,8 @@ public class SettingManager {
                 case DOUBLE:
                     set((double)((SpinnerNumberModel)component).getValue());
                     break;
+                default:
+                    break;
             }
         }
 
@@ -181,6 +183,7 @@ public class SettingManager {
     static final private String AUTOVALIDATEKEY = "auto validate enabled";
     static final private String BGGRIDVISIBLEKEY = "background grid visible";
     static final private String LAYOUTMODE = "layout mode";
+    static final private String WAITVERIFICATION = "wait verification";
 
     /**
      * Initialize SettingManager with default values.
@@ -191,6 +194,8 @@ public class SettingManager {
         settings.put(COMMANDPANELENABLED, new SettingValue(true));
         settings.put(AUTOVALIDATEKEY, new SettingValue(true));
         settings.put(BGGRIDVISIBLEKEY, new SettingValue(true));
+        settings.put(WAITVERIFICATION, new SettingValue(true));
+
         String[] options = {"classic", "modern"};
         settings.put(LAYOUTMODE, new SettingValue(options, options[0]));
     }
@@ -225,6 +230,10 @@ public class SettingManager {
      */
     public int getCommandPanelKey() {
         return KeyEvent.VK_TAB;
+    }
+
+    public boolean isWaitVerificationEnabled() {
+        return settings.get(WAITVERIFICATION).asBoolean();
     }
 
     /**

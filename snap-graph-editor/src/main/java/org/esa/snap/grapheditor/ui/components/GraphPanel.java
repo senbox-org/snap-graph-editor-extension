@@ -19,6 +19,7 @@ import org.esa.snap.grapheditor.ui.components.interfaces.NodeInterface;
 import org.esa.snap.grapheditor.ui.components.utils.*;
 import org.esa.snap.grapheditor.ui.components.interfaces.GraphListener;
 import org.esa.snap.grapheditor.ui.components.interfaces.NodeListener;
+import org.esa.snap.grapheditor.ui.components.interfaces.NotificationListener;
 import org.esa.snap.grapheditor.ui.components.interfaces.RefreshListener;
 
 /**
@@ -30,7 +31,7 @@ import org.esa.snap.grapheditor.ui.components.interfaces.RefreshListener;
  */
 public class GraphPanel extends JPanel
         implements KeyListener, MouseListener, MouseMotionListener,
-        ActionListener, RefreshListener, NodeListener, AddNodeListener {
+        ActionListener, RefreshListener, NodeListener, AddNodeListener, NotificationListener {
 
     /**
      * Generated UID
@@ -56,6 +57,7 @@ public class GraphPanel extends JPanel
 
         // set event listener for refreshing UI when needed
         GraphManager.getInstance().addEventListener(this);
+        NotificationManager.getInstance().addNotificationListener(this);
 
         this.setBackground(Color.lightGray);
         this.addMenu = new JPopupMenu();
@@ -416,5 +418,31 @@ public class GraphPanel extends JPanel
         }
         this.dragAction = new DragAction(node, p);
         repaint();
+    }
+
+    @Override
+    public void notificationIncoming(Notification n) {
+        // Nothing to do...
+    }
+
+    @Override
+    public void processStart() {
+        if (SettingManager.getInstance().isWaitVerificationEnabled()){
+            // block interaction while verification is executed
+            this.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void processEnd() {
+        if (SettingManager.getInstance().isWaitVerificationEnabled()){
+            // block interaction while verification is executed
+            this.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void progress(int value) {
+        // Nothing to do...
     }
 }
