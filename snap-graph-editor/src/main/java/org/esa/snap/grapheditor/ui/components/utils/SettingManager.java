@@ -1,6 +1,6 @@
 package org.esa.snap.grapheditor.ui.components.utils;
 
-import javafx.util.Pair;
+import org.javatuples.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -247,8 +247,8 @@ public class SettingManager {
         HashMap<String, Object> components = new HashMap<>();
         for (String title: settings.keySet()) {
             Pair<JComponent, Object> comps = settings.get(title).getComponent(title);
-            panel.add(comps.getKey());
-            components.put(title, comps.getValue());
+            panel.add(comps.getValue0());
+            components.put(title, comps.getValue1());
         }
 
         JPanel buttonPanel = new JPanel();

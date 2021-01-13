@@ -13,7 +13,7 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.*;
 
-import javafx.util.Pair;
+import org.javatuples.Pair;
 import org.esa.snap.grapheditor.ui.components.interfaces.AddNodeListener;
 import org.esa.snap.grapheditor.ui.components.interfaces.NodeInterface;
 import org.esa.snap.grapheditor.ui.components.utils.*;
@@ -277,12 +277,12 @@ public class GraphPanel extends JPanel
                 NodeGui node = graphManager.getNodes().get(i);
                 if (node.contains(p)) {
                     Pair<NodeInterface, Integer> action =  node.drag(e.getPoint());
-                    int connector = action.getValue();
+                    int connector = action.getValue1();
                     if (connector == Constants.CONNECTION_NONE) {
-                        dragAction = new DragAction(action.getKey(), p);
+                        dragAction = new DragAction(action.getValue0(), p);
                     }
                     else {
-                        dragAction = new DragAction(action.getKey(), connector, p);
+                        dragAction = new DragAction(action.getValue0(), connector, p);
                     }
 
                     return;

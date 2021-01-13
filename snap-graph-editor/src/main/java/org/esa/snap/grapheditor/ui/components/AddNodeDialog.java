@@ -1,7 +1,5 @@
 package org.esa.snap.grapheditor.ui.components;
 
-
-import javafx.util.Pair;
 import org.esa.snap.grapheditor.ui.components.interfaces.AddNodeListener;
 import org.esa.snap.grapheditor.ui.components.utils.GraphManager;
 import org.esa.snap.grapheditor.ui.components.utils.UnifiedMetadata;
@@ -12,6 +10,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import org.javatuples.Pair;
 
 /**
  * Simple floating dialog enabling users to quickly search and add new nodes to the graph using both keyboard and mouse
@@ -214,7 +213,7 @@ class AddNodeDialog extends JDialog implements KeyListener, MouseWheelListener {
             int prevActive = resultsList.getSelectedIndex();
             searchResult.sort(new ResultComparator());
             for (Pair<UnifiedMetadata, Double> res: searchResult) {
-                results.addElement(res.getKey());
+                results.addElement(res.getValue0());
                 // results.add(res.getKey());
             }
             resultsList.setVisible(true);
@@ -296,7 +295,7 @@ class AddNodeDialog extends JDialog implements KeyListener, MouseWheelListener {
         @Override
         public int compare(Pair<UnifiedMetadata, Double> i1, Pair<UnifiedMetadata, Double> i2)
         {
-            return -i1.getValue().compareTo(i2.getValue());
+            return -i1.getValue1().compareTo(i2.getValue1());
         }
     }
 }
