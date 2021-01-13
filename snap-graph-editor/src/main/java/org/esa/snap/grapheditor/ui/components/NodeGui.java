@@ -169,7 +169,7 @@ public class NodeGui implements NodeListener, NodeInterface {
      * @param g renderer
      */
     public void paintConnections(Graphics2D g) {
-        for (int i = 0; i < incomingConnections.size(); i++) {
+        for (int i: incomingConnections.keySet()) {
             Point end = getInputPosition(i);
             Point start = incomingConnections.get(i).getOutputPosition();
             GraphicalUtils.drawConnection(g, start, end, GraphicalUtils.connectionConnectedColor);
@@ -641,7 +641,7 @@ public class NodeGui implements NodeListener, NodeInterface {
     public Pair<NodeInterface, Integer> drag(Point p) {
         int iy = getInputIndex(p);
         if (iy >= 0) {
-            if (this.incomingConnections.size() > iy) {
+            if (this.incomingConnections.containsKey(iy)) {
                 NodeInterface c = this.incomingConnections.get(iy);
                 if (c != null) {
                     disconnect(iy);
