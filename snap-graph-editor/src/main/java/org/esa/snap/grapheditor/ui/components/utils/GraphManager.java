@@ -457,7 +457,7 @@ public class GraphManager implements NodeListener {
         NodeGui srcNode = (NodeGui) source;
         NotificationManager.getInstance().info(srcNode.getName(), "Deleted");
         this.nodes.remove(srcNode);
-        this.graph.removeNode(src.getName());
+        this.graph.removeNode(srcNode.getName());
         validate(srcNode, false);
     }
 

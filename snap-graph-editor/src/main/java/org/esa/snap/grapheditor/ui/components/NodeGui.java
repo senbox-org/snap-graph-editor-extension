@@ -96,7 +96,7 @@ public class NodeGui implements NodeListener, NodeInterface {
     private int tooltipIndex_ = Constants.CONNECTION_NONE;
 
     private final ArrayList<NodeListener> nodeListeners = new ArrayList<>();
-    private final ArrayList<NodeInterface> incomingConnections = new ArrayList<>();
+    private final HashMap<Integer, NodeInterface> incomingConnections = new HashMap<>();
 
     private boolean hasChanged = false;
     private Product output = null;
@@ -616,7 +616,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         NodeInterface c = this.incomingConnections.get(index);
         this.node.removeSource(this.node.getSource(index));
         c.removeNodeListener(this);
-        this.incomingConnections.remove(c);
+        this.incomingConnections.remove(index);
         hasChanged = true;
     }
 
@@ -751,20 +751,21 @@ public class NodeGui implements NodeListener, NodeInterface {
             return true;
         if (index == Constants.CONNECTION_NONE)
             return false;
-        for (NodeInterface c: incomingConnections) {
+        for (NodeInterface c: incomingConnections.values()) {
             if (c != null && other == c) {
                 return false;
             }
         }
-        return (incomingConnections.size() == index && (metadata.getMaxNumberOfInputs() <0 || index < metadata.getMaxNumberOfInputs()));
+        return (!incomingConnections.containsKey(index) && (metadata.getMaxNumberOfInputs() <0 || index < metadata.getMaxNumberOfInputs()));
     }
 
     /**
      * Internal function to add a new input connection
      * @param c connection to be add
+     * @param index connection index
      */
-    private void connect(NodeInterface c){
-        incomingConnections.add(c);
+    private void connect(NodeInterface c, int index){
+        incomingConnections.put(index, c);
         c.addNodeListener(this);
         for (NodeListener listener: this.nodeListeners) {
             listener.connectionAdded(this);
@@ -776,8 +777,8 @@ public class NodeGui implements NodeListener, NodeInterface {
 
     @Override
     public void addConnection(NodeInterface source, int index) {
-        if (index == incomingConnections.size())  {
-            connect(source);
+        if (metadata.hasFixedInputs() || index == incomingConnections.size()) {
+            connect(source, index);
         } else {
             return;
         }
@@ -855,7 +856,7 @@ public class NodeGui implements NodeListener, NodeInterface {
             return 0;
         }
         int max_d = -1;
-        for (NodeInterface c: incomingConnections) {
+        for (NodeInterface c: incomingConnections.values()) {
             int d = c.distance(n);
             if (d > max_d) {
                 max_d = d + 1;

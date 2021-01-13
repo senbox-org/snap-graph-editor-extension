@@ -89,6 +89,10 @@ public class UnifiedMetadata {
         return maxNInputs;
     }
 
+    public boolean hasFixedInputs() {
+        return maxNInputs == minNInputs;
+    }
+
     public boolean hasInputs() {
         return (minNInputs > 0);
     }
