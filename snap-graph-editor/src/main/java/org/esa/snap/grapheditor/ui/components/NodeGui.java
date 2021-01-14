@@ -444,7 +444,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         if (hasChanged && operatorUI != null) {
             Product[] products = new Product[incomingConnections.size()];
             boolean isComplete = true;
-            for (int i = 0; i < products.length; i++) {
+            for (int i: incomingConnections.keySet()) {
                 products[i] = incomingConnections.get(i).getProduct();
                 if (products[i] == null) {
                     isComplete = false;
@@ -493,33 +493,23 @@ public class NodeGui implements NodeListener, NodeInterface {
                 incomplete();
                 return;
             }
-            for (int i = 0; i < descriptors.length; i++ ){
-                SourceProductDescriptor descr = metadata.getDescriptor().getSourceProductDescriptors()[i];
+            for (int i: incomingConnections.keySet()){
+                if (i >= descriptors.length - 1) continue;
+                String sourceName = metadata.getInputName(i);
                 Product p = incomingConnections.get(i).getProduct();
                 if (p == null) {
                     incomplete();
                     return;
                 }
-                context.setSourceProduct(descr.getName(), p);
-            }
-            if (incomingConnections.size() > descriptors.length && metadata.getMaxNumberOfInputs() < 0) {
-                Product[] products = new Product[incomingConnections.size() - descriptors.length];
-                for (int i = descriptors.length; i < incomingConnections.size(); i++) {
-                    Product p = incomingConnections.get(i).getProduct();
-                    if (p == null) {
-                        incomplete();
-                        return;
-                    }
-                    products[i - descriptors.length] = p;
-                }
-                context.setSourceProducts(products);
+                NotificationManager.getInstance().error(this.getName(), "source: "+sourceName);
+                context.setSourceProduct(sourceName, p);
             }
 
             for (String param: configuration.keySet()) {
                 context.setParameter(param, configuration.get(param));
             }
             try {
-
+                NotificationManager.getInstance().info(this.getName(), context.get)
                 output = context.getTargetProduct();
                 NotificationManager.getInstance().ok(this.getName(), "Validated");
                 validationStatus = ValidationStatus.VALIDATED;
