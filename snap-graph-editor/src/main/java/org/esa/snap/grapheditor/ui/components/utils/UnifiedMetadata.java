@@ -1,6 +1,12 @@
 package org.esa.snap.grapheditor.ui.components.utils;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.ArrayList;
+
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
 
 public class UnifiedMetadata {
@@ -14,18 +20,23 @@ public class UnifiedMetadata {
     private final int minNInputs;
     private final int maxNInputs;
     private final boolean hasOutputProduct;
+    private final HashMap<String, SourceProduct> sourceProductList = new HashMap<>();
+    private final HashMap<String, SourceProducts> sourceProductsList = new HashMap<>();
+    private final HashMap<Integer, String> indexNameMap = new HashMap<>();
+    private final HashMap<String, Integer> nameIndexMap = new HashMap<>();
+    private final ArrayList<String> mandatoryInputs = new ArrayList<>();
 
 
-    public UnifiedMetadata(final OperatorMetadata opMetadata, final OperatorDescriptor opDescriptor) {
+    public UnifiedMetadata(final OperatorMetadata opMetadata, final OperatorDescriptor opDescriptor, Field[] fields) {
         this.descriptor = opDescriptor;
 
-        if (descriptor.getSourceProductsDescriptor() != null) {
-            minNInputs = descriptor.getSourceProductDescriptors().length + 1;
-            maxNInputs = -1;
-        } else {
-            minNInputs = descriptor.getSourceProductDescriptors().length;
-            maxNInputs = minNInputs;
-        }
+        // if (descriptor.getSourceProductsDescriptor() != null) {
+        //     minNInputs = descriptor.getSourceProductDescriptors().length + 1;
+        //     maxNInputs = -1;
+        // } else {
+        //     minNInputs = descriptor.getSourceProductDescriptors().length;
+        //     maxNInputs = minNInputs;
+        // }
         hasOutputProduct = descriptor.getTargetProductDescriptor() != null;
 
         name = opMetadata.label();
@@ -38,6 +49,45 @@ public class UnifiedMetadata {
 
         category_lower = category.toLowerCase();
         name_lower = name.toLowerCase();
+
+        for (int index = 0; index < opDescriptor.getSourceProductDescriptors().length; index ++) {
+            indexNameMap.put(index, opDescriptor.getSourceProductDescriptors()[index].getName());
+            nameIndexMap.put(opDescriptor.getSourceProductDescriptors()[index].getName(), index);
+        }
+
+        int minInput = 0;
+        int maxInput = 0;
+        // Retrieve the decoration of all source product and source proudcts 
+        for (Field declaredField : fields) {
+            SourceProduct sourceProductAnnotation = declaredField.getAnnotation(SourceProduct.class);
+            if (sourceProductAnnotation != null) {
+                this.sourceProductList.put(declaredField.getName(), sourceProductAnnotation);
+                if (!sourceProductAnnotation.optional()) {
+                    this.mandatoryInputs.add(declaredField.getName());
+                }
+                minInput += 1;
+                if (maxInput >= 0) {
+                    maxInput += 1;
+                } 
+            }
+            SourceProducts sourceProductsAnnotation = declaredField.getAnnotation(SourceProducts.class);
+            if (sourceProductsAnnotation != null) {
+                this.sourceProductsList.put(declaredField.getName(), sourceProductsAnnotation);
+                if (sourceProductsAnnotation.count() > 0) {
+                    minInput += sourceProductsAnnotation.count();
+                    if (maxInput >= 0)
+                        maxInput += sourceProductsAnnotation.count();
+                } else { 
+                    minInput += 1;
+
+                    maxInput = -1;
+                }
+            }
+        }
+
+        minNInputs = minInput;
+        maxNInputs = maxInput;
+        
     }
 
     public String getName() {
@@ -120,8 +170,8 @@ public class UnifiedMetadata {
 
     public String getInputName(int index) {
         if (hasInputs()) {
-            if (index <  descriptor.getSourceProductDescriptors().length) {
-                return descriptor.getSourceProductDescriptors()[index].getName();
+            if (this.indexNameMap.containsKey(index)) {
+                return this.indexNameMap.get(index);
             } else if (descriptor.getSourceProductsDescriptor() != null) {
                 String name =  "sourceProduct";
                 if (index > this.getMinNumberOfInputs() - 1) {
@@ -134,8 +184,38 @@ public class UnifiedMetadata {
         return "sourceProduct";
     }
 
+    public int getInputIndex(String name) {
+        if (this.nameIndexMap.containsKey(name)) {
+            return this.nameIndexMap.get(name);
+        }
+        return -1;
+    }
+
+    public boolean isInputOptional(String name){
+        if (sourceProductList.containsKey(name)) {
+            return sourceProductList.get(name).optional();
+        }
+        return true;
+    }
+
+
+    public boolean isInputOptional(int index) {
+        if (this.indexNameMap.containsKey(index)) {
+            return isInputOptional(this.indexNameMap.get(index));
+        }
+        return true;
+    }
+
+    public ArrayList<String> getMandatoryInputs() {
+        return this.mandatoryInputs;
+    }
+
     public OperatorDescriptor getDescriptor() {
         return descriptor;
     }
 
+
+    public boolean hasSourceProducts(){
+        return descriptor.getSourceProductsDescriptor() != null;
+    }
 }
