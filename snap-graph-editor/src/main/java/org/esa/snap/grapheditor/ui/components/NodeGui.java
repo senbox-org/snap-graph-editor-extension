@@ -610,13 +610,46 @@ public class NodeGui implements NodeListener, NodeInterface {
      * @param index input index
      */
     private void disconnect(int index) {
-
-        numInputs = Math.max(metadata.getMinNumberOfInputs(), numInputs - 1);
-        height = (numInputs + 1) * connectionOffset;
-        NodeInterface c = this.incomingConnections.get(index);
-        this.node.removeSource(this.node.getSource(index));
-        c.removeNodeListener(this);
+        boolean indexChange = false;
+        if (index >= metadata.getMinNumberOfInputs() -1) {
+            // change number of inputs only if a dynamic node has been removed
+            // else mantain same structure for mandatory inputs 
+            if (index != numInputs - 2) {
+                // if disconnected node is not the last one
+                // trigger recomputation of connection indexes.
+                indexChange = true;
+            }
+            numInputs = Math.max(metadata.getMinNumberOfInputs(), numInputs - 1);
+            height = (numInputs + 1) * connectionOffset;
+            
+        }
+        NodeInterface connection = this.incomingConnections.get(index);
+        NodeSource[] sources = this.node.getSources();
+        NodeSource sourceToDiscconect = null;
+        for (NodeSource source: sources) {
+            if (source.getSourceNodeId() == connection.getName()) {
+                sourceToDiscconect = source;
+                break;
+            }
+        }
+        if (sourceToDiscconect != null){
+            this.node.removeSource(sourceToDiscconect);
+        } else {
+            NotificationManager.getInstance().error(this.getName(), "Something wrong....");
+        }
+        connection.removeNodeListener(this);
         this.incomingConnections.remove(index);
+        if (indexChange) {
+            HashMap<Integer, NodeInterface> oldConnections = (HashMap<Integer, NodeInterface>) this.incomingConnections.clone();
+            this.incomingConnections.clear();
+            for (Map.Entry<Integer, NodeInterface> entry : oldConnections.entrySet()) {
+                if (entry.getKey() >= index) {
+                    this.incomingConnections.put(entry.getKey() - 1, entry.getValue());
+                } else {
+                    this.incomingConnections.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
         hasChanged = true;
     }
 
@@ -681,7 +714,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         } else if (connectionIndex >= 0 && metadata.hasInputs()) {
             // INPUT
             tooltipVisible_ = true;
-            tooltipText_ = split_text(metadata.getInputDescription(connectionIndex));
+            tooltipText_ = split_text(metadata.getInputName(connectionIndex)+": "+metadata.getInputDescription(connectionIndex));
             tooltipIndex_ = connectionIndex;
         } else {
             hide_tooltip();
@@ -770,27 +803,17 @@ public class NodeGui implements NodeListener, NodeInterface {
         for (NodeListener listener: this.nodeListeners) {
             listener.connectionAdded(this);
         }
-        NodeSource nodeSource =  new NodeSource("sourceProduct", c.getName());
+        String name = this.metadata.getInputName(index);
+        NodeSource nodeSource =  new NodeSource(name, c.getName());
         this.node.addSource(nodeSource);
         hasChanged = true;
     }
 
     @Override
     public void addConnection(NodeInterface source, int index) {
-        if (metadata.hasFixedInputs() || index == incomingConnections.size()) {
-            connect(source, index);
-        } else {
-            return;
-        }
-        if (metadata.getMaxNumberOfInputs() == -1) {
-            if (incomingConnections.size() < metadata.getMinNumberOfInputs()) {
-                numInputs = metadata.getMinNumberOfInputs();
-            } else if (metadata.getMaxNumberOfInputs() > 0 ) {
-                numInputs = Math.min(metadata.getMaxNumberOfInputs(), numInputs + 1);
-            }else {
-                numInputs = incomingConnections.size() + 1;
-            }
-
+        connect(source, index);
+        if (!metadata.hasFixedInputs() && index >= metadata.getMinNumberOfInputs() - 1) {
+            numInputs += 1;
             height = (numInputs + 1) * connectionOffset;
         }
     }
