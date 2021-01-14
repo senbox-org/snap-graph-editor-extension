@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
 import java.util.*;
 
 import java.awt.event.ActionListener;
@@ -96,10 +97,10 @@ public class GraphManager implements NodeListener {
             OperatorDescriptor descriptor = opSpi.getOperatorDescriptor();
             if (descriptor != null && !descriptor.isInternal()) {
                 OperatorMetadata operatorMetadata = opSpi.getOperatorClass().getAnnotation(OperatorMetadata.class);
-
+                Field[] fields = opSpi.getOperatorClass().getDeclaredFields();
                 ArrayList<OperatorMetadata> metadata = new ArrayList<>();
                 metadata.add(operatorMetadata);
-                simpleMetadata.put(operatorMetadata.alias(), new UnifiedMetadata(operatorMetadata, descriptor));
+                simpleMetadata.put(operatorMetadata.alias(), new UnifiedMetadata(operatorMetadata, descriptor, fields));
                               
             }
         }
