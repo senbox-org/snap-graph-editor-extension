@@ -51,6 +51,8 @@ public class NodeGui implements NodeListener, NodeInterface {
     private static final Color validateColor =  new Color(51, 153, 102, 200);
     private static final Color unknownColor =  new Color(233, 229, 225, 230); //Color
     private static final Color activeColor = new Color(254, 223, 176, 180);
+    
+    private static final Color optionalColor = new Color(234, 201, 53, 255); 
 
     private static final Color tooltipBackground = new Color(0, 0, 0, 180);
     private static final Color tooltipBorder = Color.white;
@@ -255,7 +257,12 @@ public class NodeGui implements NodeListener, NodeInterface {
             int xc = x - connectionHalfSize;
             int yc = y + connectionOffset - connectionHalfSize;
             for (int i = 0; i < numInputs(); i++) {
-                g.setColor(Color.white);
+                boolean optional = metadata.isInputOptional(i);
+                if (i > 0 && optional) {
+                    g.setColor(optionalColor);
+                } else {
+                    g.setColor(Color.white);
+                }
                 g.fillOval(xc, yc, connectionSize, connectionSize);
                 g.setStroke(borderStroke);
                 g.setColor(borderColor());
@@ -468,8 +475,21 @@ public class NodeGui implements NodeListener, NodeInterface {
         validationStatus = ValidationStatus.WARNING;
     }
 
+    private boolean isComplete() {
+        if (this.metadata.getMinNumberOfInputs() == 0) return true;
+        if (this.incomingConnections.size() == 0 && this.metadata.hasSourceProducts()) return false;
+        // check that all mandatory inputs are connected
+        for (String inputName : this.metadata.getMandatoryInputs()) {
+            int index = this.metadata.getInputIndex(inputName);
+            if (!this.incomingConnections.containsKey(index))
+                return false;
+        }
+        return true;
+    }
+
     private void recomputeOutput() {
-        if (incomingConnections.size() < metadata.getMinNumberOfInputs()) {
+        // Check completude
+        if (!isComplete()) {
             incomplete();
             return;
         }
@@ -494,14 +514,13 @@ public class NodeGui implements NodeListener, NodeInterface {
                 return;
             }
             for (int i: incomingConnections.keySet()){
-                if (i >= descriptors.length - 1) continue;
                 String sourceName = metadata.getInputName(i);
                 Product p = incomingConnections.get(i).getProduct();
                 if (p == null) {
                     incomplete();
                     return;
                 }
-                NotificationManager.getInstance().error(this.getName(), "source: "+sourceName);
+                NotificationManager.getInstance().info(this.getName(), "source: "+sourceName);
                 context.setSourceProduct(sourceName, p);
             }
 
