@@ -509,7 +509,6 @@ public class NodeGui implements NodeListener, NodeInterface {
                 context.setParameter(param, configuration.get(param));
             }
             try {
-                NotificationManager.getInstance().info(this.getName(), context.get)
                 output = context.getTargetProduct();
                 NotificationManager.getInstance().ok(this.getName(), "Validated");
                 validationStatus = ValidationStatus.VALIDATED;
