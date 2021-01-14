@@ -10,6 +10,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.Cursor;
 
 import javax.swing.*;
 
@@ -37,6 +38,11 @@ public class GraphPanel extends JPanel
      * Generated UID
      */
     private static final long serialVersionUID = -8787328074424783352L;
+
+    private static final Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+    private static final Cursor overCursor = new Cursor(Cursor.HAND_CURSOR);
+    private static final Cursor dragCursor = new Cursor(Cursor.MOVE_CURSOR);
+    private static final Cursor connectionCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 
     private BufferedImage gridPattern = null;
 
@@ -227,13 +233,19 @@ public class GraphPanel extends JPanel
     public void mouseMoved(MouseEvent e) {
         lastMousePosition = e.getPoint();
         // reverse loop to get correct node
+        boolean isOver = false;
         for (int i = graphManager.getNodes().size() - 1; i >= 0; i--) {
             NodeGui node = graphManager.getNodes().get(i);
             if (node.contains(lastMousePosition)) {
-                node.over(lastMousePosition);
+                isOver = true;
             } else {
                 node.none();
             }
+        }
+        if (isOver) {
+            this.setCursor(overCursor);
+        } else {
+            this.setCursor(defaultCursor);;
         }
         this.repaint();
     }
@@ -285,11 +297,18 @@ public class GraphPanel extends JPanel
                         dragAction = new DragAction(action.getValue0(), connector, p);
                     }
 
-                    return;
+                    break;
                 }
             }
         } else {
             dragAction = null;
+        }
+        if (dragAction != null) {
+            if (dragAction.getType() == DragAction.Type.DRAG) {
+                this.setCursor(dragCursor);
+            } else {
+                this.setCursor(connectionCursor);
+            }
         }
     }
 
@@ -299,11 +318,16 @@ public class GraphPanel extends JPanel
             if (dragAction.getType() == DragAction.Type.DRAG) {
                 Point p = GraphicalUtils.normalize(dragAction.getNode().getPosition());
                 moveNode(dragAction.getNode(), p.x, p.y);
+                this.setCursor(overCursor);
             } else {
                 for (NodeGui node: graphManager.getNodes()) {
                     if (node != dragAction.getNode() && node.hasTooltip()) {
                         // means is over a connection point
                         dragAction.connect(node);
+                        this.setCursor(overCursor);
+                        break;
+                    } else {
+                        this.setCursor(defaultCursor);
                     }
                 }
             }
