@@ -118,6 +118,22 @@ public class UnifiedMetadata {
         return "";
     }
 
+    public String getInputName(int index) {
+        if (hasInputs()) {
+            if (index <  descriptor.getSourceProductDescriptors().length) {
+                return descriptor.getSourceProductDescriptors()[index].getName();
+            } else if (descriptor.getSourceProductsDescriptor() != null) {
+                String name =  "sourceProduct";
+                if (index > this.getMinNumberOfInputs() - 1) {
+                    int localIndex = index - this.getMinNumberOfInputs() + 1;
+                    name += "." + localIndex;
+                }
+                return name;
+            } 
+        } 
+        return "sourceProduct";
+    }
+
     public OperatorDescriptor getDescriptor() {
         return descriptor;
     }
