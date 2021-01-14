@@ -238,6 +238,7 @@ public class GraphPanel extends JPanel
             NodeGui node = graphManager.getNodes().get(i);
             if (node.contains(lastMousePosition)) {
                 isOver = true;
+                node.over(lastMousePosition);
             } else {
                 node.none();
             }
