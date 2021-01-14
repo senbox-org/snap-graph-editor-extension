@@ -47,7 +47,7 @@ public class NotificationManager implements ProgressMonitor {
      * @param source sender
      * @param message content
      */
-    void info(String source, String message) {
+    public void info(String source, String message) {
         notify(Notification.info(source, message));
     }
 
