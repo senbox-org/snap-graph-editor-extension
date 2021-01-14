@@ -73,6 +73,7 @@ public abstract class BaseOperatorUI implements OperatorUI {
     protected void initializeOperatorUI(final String operatorName, final Map<String, Object> parameterMap) {
         this.operatorName = operatorName;
         this.paramMap = parameterMap;
+        System.out.println(parameterMap);
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
@@ -169,15 +170,18 @@ public abstract class BaseOperatorUI implements OperatorUI {
     protected String[] getBandNames() {
         final ArrayList<String> bandNames = new ArrayList<>(5);
         if (sourceProducts != null) {
-            for (Product prod : sourceProducts) {
-                if (sourceProducts.length > 1) {
-                    for (String name : prod.getBandNames()) {
-                        bandNames.add(name + "::" + prod.getName());
-                    }
-                } else {
-                    bandNames.addAll(Arrays.asList(prod.getBandNames()));
-                }
+            if (sourceProducts.length >= 1) {
+                bandNames.addAll(Arrays.asList(sourceProducts[0].getBandNames()));
             }
+            // for (Product prod : sourceProducts) {
+            //     if (sourceProducts.length > 1) {
+            //         for (String name : prod.getBandNames()) {
+            //             bandNames.add(name + "::" + prod.getName());
+            //         }
+            //     } else {
+            //         bandNames.addAll(Arrays.asList(prod.getBandNames()));
+            //     }
+            // }
         }
         return bandNames.toArray(new String[0]);
     }

@@ -21,6 +21,9 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.binding.BindingContext;
 import com.bc.ceres.swing.binding.PropertyPane;
+
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.ui.AppContext;
 
 import javax.swing.JComponent;
@@ -58,7 +61,8 @@ public class DefaultUI extends BaseOperatorUI {
 
     @Override
     public void updateParameters() {
-
+        updateSourceBands();
+        
     }
 
     private void updateSourceBands() {
@@ -67,9 +71,8 @@ public class DefaultUI extends BaseOperatorUI {
         final Property[] properties = propertySet.getProperties();
         for (Property p : properties) {
             final PropertyDescriptor descriptor = p.getDescriptor();
-            final String alias = descriptor.getAlias();
 
-            if (sourceProducts != null && alias != null && alias.equals("sourceBands")) {
+            if (sourceProducts != null  && descriptor.getName().toLowerCase().contains("band")) {
                 final String[] bandNames = getBandNames();
                 if (bandNames.length > 0) {
                     final ValueSet valueSet = new ValueSet(bandNames);
