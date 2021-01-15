@@ -188,18 +188,15 @@ public abstract class BaseOperatorUI implements OperatorUI {
     protected String[] getBandNames() {
         final ArrayList<String> bandNames = new ArrayList<>(5);
         if (sourceProducts != null) {
-            if (sourceProducts.length >= 1) {
-                bandNames.addAll(Arrays.asList(sourceProducts[0].getBandNames()));
+            for (Product prod : sourceProducts) {
+                if (sourceProducts.length > 1) {
+                    for (String name : prod.getBandNames()) {
+                        bandNames.add(name + "::" + prod.getName());
+                    }
+                } else {
+                    bandNames.addAll(Arrays.asList(prod.getBandNames()));
+                }
             }
-            // for (Product prod : sourceProducts) {
-            //     if (sourceProducts.length > 1) {
-            //         for (String name : prod.getBandNames()) {
-            //             bandNames.add(name + "::" + prod.getName());
-            //         }
-            //     } else {
-            //         bandNames.addAll(Arrays.asList(prod.getBandNames()));
-            //     }
-            // }
         }
         return bandNames.toArray(new String[0]);
     }
