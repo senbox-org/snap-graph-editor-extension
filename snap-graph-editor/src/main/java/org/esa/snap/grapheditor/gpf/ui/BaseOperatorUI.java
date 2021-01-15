@@ -32,14 +32,17 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
+import org.esa.snap.core.gpf.descriptor.ParameterDescriptor;
 import org.esa.snap.core.gpf.descriptor.PropertySetDescriptorFactory;
 import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.grapheditor.ui.components.utils.UnifiedMetadata;
 import org.esa.snap.ui.AppContext;
 
 import javax.swing.JComponent;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,12 +56,24 @@ import java.util.Set;
 public abstract class BaseOperatorUI implements OperatorUI {
 
     protected PropertySet propertySet = null;
+    protected UnifiedMetadata metadata = null;
+    protected Map<String, ParameterDescriptor> unifiedMetadataMap;
     protected Map<String, Object> paramMap = null;
     protected Product[] sourceProducts = null;
     protected String operatorName = "";
 
-    public abstract JComponent CreateOpTab(final String operatorName,
-                                           final Map<String, Object> parameterMap, final AppContext appContext);
+    public abstract JComponent CreateOpTab(final String operatorName, final Map<String, Object> parameterMap,
+            final AppContext appContext);
+
+    public JComponent CreateOpTab(final String operatorName, final Map<String, Object> parameterMap,
+            final AppContext appContext, final UnifiedMetadata metadata) {
+        unifiedMetadataMap = new HashMap<String, ParameterDescriptor>();
+        ParameterDescriptor[] parameteresDescriptors = metadata.getDescriptor().getParameterDescriptors();
+        for (ParameterDescriptor paramDescriptor : parameteresDescriptors) {
+            unifiedMetadataMap.put(paramDescriptor.getName(),paramDescriptor);
+        }
+        return CreateOpTab(operatorName, parameterMap, appContext);
+    }
 
     public abstract void initParameters();
 
@@ -83,7 +98,8 @@ public abstract class BaseOperatorUI implements OperatorUI {
         final OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
         final PropertySetDescriptor propertySetDescriptor;
         try {
-            propertySetDescriptor = PropertySetDescriptorFactory.createForOperator(operatorDescriptor, descriptorFactory.getSourceProductMap());
+            propertySetDescriptor = PropertySetDescriptorFactory.createForOperator(operatorDescriptor,
+                    descriptorFactory.getSourceProductMap());
         } catch (ConversionException e) {
             throw new IllegalStateException("Not able to init OperatorParameterSupport.", e);
         }
@@ -134,7 +150,8 @@ public abstract class BaseOperatorUI implements OperatorUI {
 
                 final String itemAlias = descriptor.getItemAlias();
                 if (descriptor.getType().isArray() && itemAlias != null && !itemAlias.isEmpty()) {
-                    final DomElement childElement = descriptor.getItemsInlined() ? parentElement : parentElement.createChild(getElementName(p));
+                    final DomElement childElement = descriptor.getItemsInlined() ? parentElement
+                            : parentElement.createChild(getElementName(p));
                     final Object array = p.getValue();
                     final Converter itemConverter = getItemConverter(descriptor);
                     if (array != null && itemConverter != null) {
@@ -154,7 +171,8 @@ public abstract class BaseOperatorUI implements OperatorUI {
                     final Object childValue = p.getValue();
                     final Converter converter = descriptor.getConverter();
                     if (converter == null) {
-                        throw new GraphException(operatorName + " BaseOperatorUI: no converter found for parameter " + descriptor.getName());
+                        throw new GraphException(operatorName + " BaseOperatorUI: no converter found for parameter "
+                                + descriptor.getName());
                     }
 
                     String text = converter.format(childValue);
@@ -199,11 +217,13 @@ public abstract class BaseOperatorUI implements OperatorUI {
     }
 
     private void setParamsToConfiguration(final XppDom config) {
-        if (paramMap == null) return;
-        final Set<String> keys = paramMap.keySet();                     // The set of keys in the map.
+        if (paramMap == null)
+            return;
+        final Set<String> keys = paramMap.keySet(); // The set of keys in the map.
         for (String key : keys) {
-            final Object value = paramMap.get(key);             // Get the value for that key.
-            if (value == null) continue;
+            final Object value = paramMap.get(key); // Get the value for that key.
+            if (value == null)
+                continue;
 
             XppDom xml = config.getChild(key);
             if (xml == null) {
@@ -233,12 +253,6 @@ public abstract class BaseOperatorUI implements OperatorUI {
     }
 
     public Map<String, Object> getParameters() {
-//        HashMap<String, Object> params = new HashMap<>();
-//        if (propertySet != null) {
-//            for (Property p: this.propertySet.getProperties()) {
-//                params.put(p.getName(), p.getValue());
-//            }
-//        }
         return paramMap;
     }
 }

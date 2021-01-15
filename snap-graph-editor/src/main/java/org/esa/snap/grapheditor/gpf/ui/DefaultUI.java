@@ -21,6 +21,7 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.binding.BindingContext;
 import com.bc.ceres.swing.binding.PropertyPane;
+import org.esa.snap.core.gpf.descriptor.ParameterDescriptor;
 import org.esa.snap.ui.AppContext;
 
 import javax.swing.JComponent;
@@ -66,24 +67,27 @@ public class DefaultUI extends BaseOperatorUI {
 
         final Property[] properties = propertySet.getProperties();
         for (Property p : properties) {
+            System.out.println(p);
             final PropertyDescriptor descriptor = p.getDescriptor();
-            final String alias = descriptor.getAlias();
-
-            if (sourceProducts != null && alias != null && alias.equals("sourceBands")) {
-                final String[] bandNames = getBandNames();
-                if (bandNames.length > 0) {
-                    final ValueSet valueSet = new ValueSet(bandNames);
-                    descriptor.setValueSet(valueSet);
-
-                    try {
-                        if (descriptor.getType().isArray()) {
-                            if (p.getValue() == null)
-                                p.setValue(bandNames);//new String[] {bandNames[0]});
-                        } else {
-                            p.setValue(bandNames[0]);
+            // final String alias = descriptor.getAlias();
+            
+            if(unifiedMetadataMap.containsKey(p.getName())){
+                if (sourceProducts != null && unifiedMetadataMap.get(p.getName()).getRasterDataNodeClass() == org.esa.snap.core.datamodel.Band.class){
+                    final String[] bandNames = getBandNames();
+                    if (bandNames.length > 0) {
+                        final ValueSet valueSet = new ValueSet(bandNames);
+                        descriptor.setValueSet(valueSet);
+    
+                        try {
+                            if (descriptor.getType().isArray()) {
+                                if (p.getValue() == null)
+                                    p.setValue(bandNames);//new String[] {bandNames[0]});
+                            } else {
+                                p.setValue(bandNames[0]);
+                            }
+                        } catch (ValidationException e) {
+                            e.printStackTrace();
                         }
-                    } catch (ValidationException e) {
-                        e.printStackTrace();
                     }
                 }
             }
