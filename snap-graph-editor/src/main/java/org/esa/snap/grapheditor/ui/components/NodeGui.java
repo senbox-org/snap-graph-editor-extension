@@ -744,8 +744,8 @@ public class NodeGui implements NodeListener, NodeInterface {
     public JComponent getPreferencePanel(){
         if (preferencePanel == null) {
             try {
-                preferencePanel = operatorUI.CreateOpTab(this.metadata.getName(), configuration , GraphManager.getInstance().getContext());
-                operatorUI.initParameters();
+                preferencePanel = operatorUI.CreateOpTab(this.metadata.getName(), configuration , GraphManager.getInstance().getContext(), metadata);
+                operatorUI.initParameters(); 
             } catch (Exception e) {
                 SystemUtils.LOG.info(e.getMessage());
                 preferencePanel = null;

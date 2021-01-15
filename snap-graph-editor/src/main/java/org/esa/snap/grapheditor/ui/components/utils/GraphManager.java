@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.*;
 
 import java.awt.event.ActionListener;
@@ -179,7 +181,6 @@ public class GraphManager implements NodeListener {
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
         final PropertyContainer valueContainer = PropertyContainer.createMapBacked(parameterMap,
                 operatorSpi.getOperatorClass(), parameterDescriptorFactory);
-
         final DomElement config = node.getConfiguration();
         final int count = config.getChildCount();
         for (int i = 0; i < count; ++i) {
@@ -504,12 +505,9 @@ public class GraphManager implements NodeListener {
      * Initialize a simple graph composed by a Reader and a Writer
      */
     public void createEmptyGraph() {
-        clearGraph();
-        NodeGui n = newNode("Read");
-        n.setPosition(90, 30);
-        n = newNode("Write");
-        n.setPosition(390, 30);
-        NotificationManager.getInstance().info("Graph", "empty graph created.");
+        URL graphFileStream = getClass().getClassLoader().getResource("graphs/ReadWriteGraph.xml");
+        System.out.println(graphFileStream.getPath());
+        openGraph(new File(graphFileStream.getPath()));
     }
 
     /**

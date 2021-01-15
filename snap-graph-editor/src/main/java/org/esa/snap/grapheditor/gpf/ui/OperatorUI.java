@@ -19,6 +19,7 @@ package org.esa.snap.grapheditor.gpf.ui;
 import com.bc.ceres.binding.dom.XppDomElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.grapheditor.ui.components.utils.UnifiedMetadata;
 import org.esa.snap.ui.AppContext;
 
 import javax.swing.JComponent;
@@ -32,6 +33,8 @@ public interface OperatorUI {
     String getOperatorName();
 
     JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext);
+
+    JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext, UnifiedMetadata metadata);
 
     void initParameters();
 
