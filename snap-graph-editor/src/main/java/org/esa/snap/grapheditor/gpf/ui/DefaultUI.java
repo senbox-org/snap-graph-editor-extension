@@ -59,7 +59,8 @@ public class DefaultUI extends BaseOperatorUI {
 
     @Override
     public void updateParameters() {
-
+        updateSourceBands();
+        
     }
 
     private void updateSourceBands() {
@@ -68,9 +69,7 @@ public class DefaultUI extends BaseOperatorUI {
         final Property[] properties = propertySet.getProperties();
         for (Property p : properties) {
             System.out.println(p);
-            final PropertyDescriptor descriptor = p.getDescriptor();
-            // final String alias = descriptor.getAlias();
-            
+            final PropertyDescriptor descriptor = p.getDescriptor();            
             if(unifiedMetadataMap.containsKey(p.getName())){
                 if (sourceProducts != null && unifiedMetadataMap.get(p.getName()).getRasterDataNodeClass() == org.esa.snap.core.datamodel.Band.class){
                     final String[] bandNames = getBandNames();

@@ -451,11 +451,13 @@ public class NodeGui implements NodeListener, NodeInterface {
         if (hasChanged && operatorUI != null) {
             Product[] products = new Product[incomingConnections.size()];
             boolean isComplete = true;
-            for (int i: incomingConnections.keySet()) {
-                products[i] = incomingConnections.get(i).getProduct();
+            int i = 0;
+            for (int index: incomingConnections.keySet()) {
+                products[i] = incomingConnections.get(index).getProduct();
                 if (products[i] == null) {
                     isComplete = false;
                 }
+                i += 1;
             }
             if (products.length > 0 && isComplete) {
                 operatorUI.setSourceProducts(products);
@@ -471,7 +473,7 @@ public class NodeGui implements NodeListener, NodeInterface {
 
     private void incomplete() {
         output = null;
-        NotificationManager.getInstance().warning(this.getName(), "Some input proudcts are missing. Node can not be validated");
+        NotificationManager.getInstance().warning(this.getName(), "Some input products are missing. Node can not be validated");
         validationStatus = ValidationStatus.WARNING;
     }
 
@@ -493,6 +495,20 @@ public class NodeGui implements NodeListener, NodeInterface {
             incomplete();
             return;
         }
+
+        // setting inputs
+
+        for (int i: incomingConnections.keySet()){
+            String sourceName = metadata.getInputName(i);
+            Product p = incomingConnections.get(i).getProduct();
+            if (p == null) {
+                incomplete();
+                return;
+            }
+            NotificationManager.getInstance().info(this.getName(), "source: "+sourceName);
+            context.setSourceProduct(sourceName, p);
+        }
+            
         operatorUI.updateParameters();
 
         recomputeOutputNeeded = false;
@@ -508,30 +524,17 @@ public class NodeGui implements NodeListener, NodeInterface {
                 validationStatus = ValidationStatus.ERROR;
             }
 
-            SourceProductDescriptor[] descriptors = metadata.getDescriptor().getSourceProductDescriptors();
-            if (incomingConnections.size() < descriptors.length) {
-                incomplete();
-                return;
-            }
-            for (int i: incomingConnections.keySet()){
-                String sourceName = metadata.getInputName(i);
-                Product p = incomingConnections.get(i).getProduct();
-                if (p == null) {
-                    incomplete();
-                    return;
-                }
-                NotificationManager.getInstance().info(this.getName(), "source: "+sourceName);
-                context.setSourceProduct(sourceName, p);
-            }
-
+            NotificationManager.getInstance().info(this.getName(), "setting parameters");
             for (String param: configuration.keySet()) {
                 context.setParameter(param, configuration.get(param));
             }
             try {
+                NotificationManager.getInstance().info(this.getName(), "validating");
                 output = context.getTargetProduct();
                 NotificationManager.getInstance().ok(this.getName(), "Validated");
                 validationStatus = ValidationStatus.VALIDATED;
             } catch (Exception e) {
+                e.printStackTrace();
                 NotificationManager.getInstance().error(this.getName(), e.getMessage());
                 output = null;
                 validationStatus = ValidationStatus.ERROR;
