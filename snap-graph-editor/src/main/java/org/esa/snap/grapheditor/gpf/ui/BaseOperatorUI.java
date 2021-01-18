@@ -191,8 +191,9 @@ public abstract class BaseOperatorUI implements OperatorUI {
             for (Product prod : sourceProducts) {
                 if (sourceProducts.length > 1) {
                     for (String name : prod.getBandNames()) {
-                        bandNames.add(name + "::" + prod.getName());
+                        bandNames.add(name);//+ "::" + prod.getName()
                     }
+                    break;
                 } else {
                     bandNames.addAll(Arrays.asList(prod.getBandNames()));
                 }

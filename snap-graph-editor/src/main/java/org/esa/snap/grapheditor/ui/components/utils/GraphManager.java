@@ -39,7 +39,6 @@ import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.GraphProcessor;
 import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.gpf.graph.NodeSource;
-import org.esa.snap.core.gpf.internal.OperatorContext;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.grapheditor.gpf.ui.OperatorUI;
 import org.esa.snap.grapheditor.gpf.ui.OperatorUIRegistry;
@@ -68,7 +67,6 @@ public class GraphManager implements NodeListener {
 
     private final ArrayList<NodeGui> nodes = new ArrayList<>();
     private final Graph graph = new Graph("");
-
 
     static private GraphManager instance = null;
 
@@ -103,7 +101,6 @@ public class GraphManager implements NodeListener {
                 ArrayList<OperatorMetadata> metadata = new ArrayList<>();
                 metadata.add(operatorMetadata);
                 simpleMetadata.put(operatorMetadata.alias(), new UnifiedMetadata(operatorMetadata, descriptor, fields));
-                              
             }
         }
     }
@@ -287,8 +284,8 @@ public class GraphManager implements NodeListener {
         for (final Property p : properties) {
 
             final PropertyDescriptor descriptor = p.getDescriptor();
-            if (descriptor != null && (descriptor.getName().equals(name) ||
-                    (descriptor.getAlias() != null && descriptor.getAlias().equals(name)))) {
+            if (descriptor != null && (descriptor.getName().equals(name)
+                    || (descriptor.getAlias() != null && descriptor.getAlias().equals(name)))) {
                 return descriptor.getDomConverter();
             }
         }
@@ -302,13 +299,12 @@ public class GraphManager implements NodeListener {
      * @return category sub-menu
      */
     static private JMenu getCategoryMenu(JMenu menu, String category) {
-        if (category == null || category.length() == 0) 
+        if (category == null || category.length() == 0)
             return menu;
         String first = category.split("/")[0];
-        
         String rest = "";
         if (first.length() < category.length()) {
-            rest = category.substring(first.length()+1);
+            rest = category.substring(first.length() + 1);
         }
         int menusCounter = 0;
         for (int i = 0; i < menu.getItemCount(); i++) {
@@ -317,7 +313,7 @@ public class GraphManager implements NodeListener {
                 if (item.getText().equals(first)) {
                     return getCategoryMenu((JMenu) item, rest);
                 }
-                menusCounter ++;
+                menusCounter++;
             }
         }
         JMenu newMenu = new JMenu(first);
@@ -329,12 +325,11 @@ public class GraphManager implements NodeListener {
 
     /**
      * Create the Operator Menu using the available metadata.
-     *
      * @return new operators menu
      */
     public JMenu createOperatorMenu(ActionListener listener) {
         JMenu addMenu = new JMenu("Add");
-        for (UnifiedMetadata metadata: getSimplifiedMetadata()) {
+        for (UnifiedMetadata metadata : getSimplifiedMetadata()) {
             JMenu menu = getCategoryMenu(addMenu, metadata.getCategory());
             JMenuItem item = new JMenuItem(metadata.getName());
             item.setHorizontalTextPosition(JMenuItem.RIGHT);
@@ -349,7 +344,7 @@ public class GraphManager implements NodeListener {
      * @param opName operator name
      * @return new node
      */
-    public NodeGui newNode(String opName){
+    public NodeGui newNode(String opName) {
         if (simpleMetadata.containsKey(opName))
             return newNode(simpleMetadata.get(opName));
         return null;
@@ -367,12 +362,13 @@ public class GraphManager implements NodeListener {
             this.graph.addNode(node);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            NotificationManager.getInstance().error("GraphManager", "The node ID `"+node.getId()+"` exists already");
+            NotificationManager.getInstance().error("GraphManager",
+                    "The node ID `" + node.getId() + "` exists already");
             return null;
         }
         Operator operator = GraphManager.getInstance().getOperator(metadata);
         assert operator != null;
-        NodeGui newNode = new NodeGui(node, getConfiguration(node), metadata, ui, new OperatorContext(operator));
+        NodeGui newNode = new NodeGui(node, getConfiguration(node), metadata, ui, operator.getContext());
         this.nodes.add(newNode);
         newNode.addNodeListener(this);
         NotificationManager.getInstance().info(newNode.getName(), "Created");
@@ -506,7 +502,6 @@ public class GraphManager implements NodeListener {
      */
     public void createEmptyGraph() {
         URL graphFileStream = getClass().getClassLoader().getResource("graphs/ReadWriteGraph.xml");
-        System.out.println(graphFileStream.getPath());
         openGraph(new File(graphFileStream.getPath()));
     }
 
@@ -681,7 +676,7 @@ public class GraphManager implements NodeListener {
                         OperatorUI ui = OperatorUIRegistry.CreateOperatorUI(meta.getName());
                         Operator operator = GraphManager.getInstance().getOperator(meta);
                         assert operator != null;
-                        NodeGui ng = new NodeGui(copyNode(n), getConfiguration(n), meta, ui, new OperatorContext(operator));
+                        NodeGui ng = new NodeGui(copyNode(n), getConfiguration(n), meta, ui, operator.getContext());
                         nodes.add(ng);
                     } else {
                         NotificationManager.getInstance().error("Graph",
