@@ -21,6 +21,8 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.binding.BindingContext;
 import com.bc.ceres.swing.binding.PropertyPane;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.esa.snap.core.gpf.descriptor.ParameterDescriptor;
 import org.esa.snap.ui.AppContext;
 
@@ -34,8 +36,8 @@ import java.util.Map;
 public class DefaultUI extends BaseOperatorUI {
 
     @Override
-    public JComponent CreateOpTab(final String operatorName,
-                                  final Map<String, Object> parameterMap, final AppContext appContext) {
+    public JComponent CreateOpTab(final String operatorName, final Map<String, Object> parameterMap,
+            final AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
         final BindingContext context = new BindingContext(propertySet);
@@ -60,32 +62,32 @@ public class DefaultUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
         updateSourceBands();
-        
+
     }
 
     private void updateSourceBands() {
-        if (propertySet == null) return;
+        if (propertySet == null)
+            return;
 
         final Property[] properties = propertySet.getProperties();
         for (Property p : properties) {
-            System.out.println(p);
-            final PropertyDescriptor descriptor = p.getDescriptor();            
-            if(unifiedMetadataMap.containsKey(p.getName())){
-                if (sourceProducts != null && unifiedMetadataMap.get(p.getName()).getRasterDataNodeClass() == org.esa.snap.core.datamodel.Band.class){
+            final PropertyDescriptor descriptor = p.getDescriptor();
+            if (unifiedMetadataMap.containsKey(p.getName())) {
+                if (sourceProducts != null && unifiedMetadataMap.get(p.getName())
+                        .getRasterDataNodeClass() == org.esa.snap.core.datamodel.Band.class) {
                     final String[] bandNames = getBandNames();
                     if (bandNames.length > 0) {
                         final ValueSet valueSet = new ValueSet(bandNames);
                         descriptor.setValueSet(valueSet);
-    
                         try {
-                            if (descriptor.getType().isArray()) {
-                                if (p.getValue() == null)
-                                    p.setValue(bandNames);//new String[] {bandNames[0]});
-                            } else {
+                            //check if the updated bandnames contains a previous selected band
+                            boolean contains = ArrayUtils.contains(bandNames, p.getValue());
+                            if (p.getValue() == null || !contains)
                                 p.setValue(bandNames[0]);
-                            }
                         } catch (ValidationException e) {
                             e.printStackTrace();
+                        } catch (Exception e) {
+                            new ValidationException("Band names are not consistents.").printStackTrace();
                         }
                     }
                 }

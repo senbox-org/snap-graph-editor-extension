@@ -88,7 +88,6 @@ public abstract class BaseOperatorUI implements OperatorUI {
     protected void initializeOperatorUI(final String operatorName, final Map<String, Object> parameterMap) {
         this.operatorName = operatorName;
         this.paramMap = parameterMap;
-        System.out.println(parameterMap);
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
@@ -190,10 +189,8 @@ public abstract class BaseOperatorUI implements OperatorUI {
         if (sourceProducts != null) {
             for (Product prod : sourceProducts) {
                 if (sourceProducts.length > 1) {
-                    for (String name : prod.getBandNames()) {
-                        bandNames.add(name);//+ "::" + prod.getName()
-                    }
-                    break;
+                    bandNames.addAll(Arrays.asList(prod.getBandNames()));
+                    break;//display only the first source bands
                 } else {
                     bandNames.addAll(Arrays.asList(prod.getBandNames()));
                 }
