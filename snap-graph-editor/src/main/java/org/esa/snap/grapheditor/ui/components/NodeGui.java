@@ -1,6 +1,7 @@
 package org.esa.snap.grapheditor.ui.components;
 
 import java.awt.*;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,10 +13,10 @@ import javax.swing.JComponent;
 import com.bc.ceres.binding.dom.XppDomElement;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.gpf.graph.NodeSource;
-import org.esa.snap.core.gpf.internal.OperatorContext;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.grapheditor.gpf.ui.OperatorUI;
 import org.esa.snap.grapheditor.gpf.ui.UIValidation;
@@ -26,20 +27,17 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * NodeGui is the main component of the GraphBuilder and it represents a node that is an instance of an Operator
- * It can self-validate as well as notify the connected nodes of its changes.
+ * NodeGui is the main component of the GraphBuilder and it represents a node
+ * that is an instance of an Operator It can self-validate as well as notify the
+ * connected nodes of its changes.
  *
- * @author Martino Ferrari (CS Group)
+ * @author Martino Ferrari (CS Group) and Florian Douziech(CS Group)
  */
 public class NodeGui implements NodeListener, NodeInterface {
 
     public enum ValidationStatus {
-        UNCHECKED,
-        VALIDATED,
-        ERROR,
-        WARNING,
+        UNCHECKED, VALIDATED, ERROR, WARNING,
     }
-
 
     private static final int STATUS_MASK_OVER = 1 << 1;
     private static final int STATUS_MASK_SELECTED = 1 << 2;
@@ -47,11 +45,11 @@ public class NodeGui implements NodeListener, NodeInterface {
     private static final int MAX_LINE_LENGTH = 45;
 
     private static final Color errorColor = new Color(255, 80, 80, 200);
-    private static final Color validateColor =  new Color(51, 153, 102, 200);
-    private static final Color unknownColor =  new Color(233, 229, 225, 230); //Color
+    private static final Color validateColor = new Color(51, 153, 102, 200);
+    private static final Color unknownColor = new Color(233, 229, 225, 230); // Color
     private static final Color activeColor = new Color(254, 223, 176, 180);
-    
-    private static final Color optionalColor = new Color(234, 201, 53, 255); 
+
+    private static final Color optionalColor = new Color(234, 201, 53, 255);
 
     private static final Color tooltipBackground = new Color(0, 0, 0, 180);
     private static final Color tooltipBorder = Color.white;
@@ -85,7 +83,7 @@ public class NodeGui implements NodeListener, NodeInterface {
 
     private final UnifiedMetadata metadata;
     private final OperatorUI operatorUI;
-    private final OperatorContext context;
+    private final Operator operator;
 
     private final Node node;
     private Map<String, Object> configuration;
@@ -105,13 +103,15 @@ public class NodeGui implements NodeListener, NodeInterface {
 
     /**
      * Create a new Node Gui.
-     * @param node basic Node information
+     *
+     * @param node          basic Node information
      * @param configuration current node configuration
-     * @param metadata unified metadata
-     * @param operatorUI operator properties ui
-     * @param context execution context
+     * @param metadata      unified metadata
+     * @param operatorUI    operator properties ui
+     * @param context       execution context
      */
-    public NodeGui (Node node, Map<String, Object> configuration, @NotNull UnifiedMetadata metadata, OperatorUI operatorUI, OperatorContext context){
+    public NodeGui(Node node, Map<String, Object> configuration, @NotNull UnifiedMetadata metadata,
+            OperatorUI operatorUI, Operator operator) {
         this.x = 0;
         this.y = 0;
         this.metadata = metadata;
@@ -122,7 +122,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         this.configuration = configuration;
         numInputs = metadata.getMinNumberOfInputs();
         height = Math.max(height, connectionOffset * (numInputs + 1));
-        this.context = context;
+        this.operator = operator;
     }
 
     @Override
@@ -139,10 +139,10 @@ public class NodeGui implements NodeListener, NodeInterface {
         }
 
         if ((this.status & STATUS_MASK_SELECTED) > 0) {
-            Graphics2D gactive = (Graphics2D)g.create();
+            Graphics2D gactive = (Graphics2D) g.create();
             gactive.setColor(activeColor);
             gactive.setStroke(activeStroke);
-            gactive.drawRoundRect(x-2, y-2, width + 4,  height + 4, 8, 8);
+            gactive.drawRoundRect(x - 2, y - 2, width + 4, height + 4, 8, 8);
             gactive.dispose();
         }
 
@@ -159,7 +159,7 @@ public class NodeGui implements NodeListener, NodeInterface {
             g.setColor(Color.darkGray);
         }
 
-        g.drawString(name, x + (width - textW) / 2 , y + (textH + 5));
+        g.drawString(name, x + (width - textW) / 2, y + (textH + 5));
 
         paintInputs(g);
         paintOutput(g);
@@ -170,7 +170,7 @@ public class NodeGui implements NodeListener, NodeInterface {
      * @param g renderer
      */
     public void paintConnections(Graphics2D g) {
-        for (int i: incomingConnections.keySet()) {
+        for (int i : incomingConnections.keySet()) {
             Point end = getInputPosition(i);
             Point start = incomingConnections.get(i).getOutputPosition();
             GraphicalUtils.drawConnection(g, start, end, GraphicalUtils.connectionConnectedColor);
@@ -185,12 +185,11 @@ public class NodeGui implements NodeListener, NodeInterface {
             result.add(line);
         } else {
             int start = 0;
-            int N = (int)Math.ceil((double)line.length() / MAX_LINE_LENGTH);
+            int N = (int) Math.ceil((double) line.length() / MAX_LINE_LENGTH);
             for (int i = 0; i < N; i++) {
                 int end = Math.min(start + MAX_LINE_LENGTH, line.length());
                 String subline = line.substring(start, end);
-                if (end < line.length()
-                        && Character.isLetter(line.charAt(end-1))
+                if (end < line.length() && Character.isLetter(line.charAt(end - 1))
                         && Character.isLetter(line.charAt(end))) {
                     subline += "-";
                 }
@@ -198,14 +197,15 @@ public class NodeGui implements NodeListener, NodeInterface {
                 start = end;
             }
         }
-        return  result;
+        return result;
     }
 
     @Contract("null -> null")
     static private String[] split_text(String input) {
-        if (input == null) return null;
+        if (input == null)
+            return null;
         ArrayList<String> result = new ArrayList<>();
-        for (String line: input.split("\n")) {
+        for (String line : input.split("\n")) {
             result.addAll(splitLine(line));
         }
         return result.toArray(new String[0]);
@@ -220,7 +220,7 @@ public class NodeGui implements NodeListener, NodeInterface {
             FontMetrics fontMetrics = g.getFontMetrics();
 
             int textH = fontMetrics.getHeight();
-            int tooltipH = textH + (textH+4) * (tooltipText_.length - 1) + 8;
+            int tooltipH = textH + (textH + 4) * (tooltipText_.length - 1) + 8;
 
             int tooltipW = fontMetrics.stringWidth(tooltipText_[0]) + 8;
             for (int i = 1; i < tooltipText_.length; i++) {
@@ -244,7 +244,7 @@ public class NodeGui implements NodeListener, NodeInterface {
             g.setStroke(textStroke);
             g.setColor(tooltipColor);
             int stringY = ty + 8 + (textH / 2);
-            for (String line: tooltipText_){
+            for (String line : tooltipText_) {
                 g.drawString(line, tx + 4, stringY);
                 stringY += textH + 4;
             }
@@ -329,7 +329,7 @@ public class NodeGui implements NodeListener, NodeInterface {
     }
 
     @Override
-    public void setPosition(int x, int y){
+    public void setPosition(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -375,13 +375,13 @@ public class NodeGui implements NodeListener, NodeInterface {
     private boolean isOverOutput(@NotNull Point p) {
         int dx = p.x - x;
         int dy = p.y - y;
-        return (metadata.hasOutput()
-                && Math.abs(dx - width) <= connectionHalfSize
+        return (metadata.hasOutput() && Math.abs(dx - width) <= connectionHalfSize
                 && Math.abs(dy - connectionOffset) <= connectionHalfSize);
     }
 
     /**
      * Checks if a point is inside the NodeGui body and connectors
+     * 
      * @param p point
      * @return if the point is inside the NodeGui body
      */
@@ -392,13 +392,15 @@ public class NodeGui implements NodeListener, NodeInterface {
         if (inside)
             return true;
         // check if is over a connection input
-        if (getInputIndex(p) >= 0) return true;
+        if (getInputIndex(p) >= 0)
+            return true;
         // check if is over a connection output
         return isOverOutput(p);
     }
 
     /**
      * Adds the STATUS_OVER_MASK to the NodeGui and show tooltip if needed
+     * 
      * @param p mouse position
      * @return if the status changed
      */
@@ -408,7 +410,7 @@ public class NodeGui implements NodeListener, NodeInterface {
             status += STATUS_MASK_OVER;
         }
         int iy = getConnectionAt(p);
-        if (iy != Constants.CONNECTION_NONE ) {
+        if (iy != Constants.CONNECTION_NONE) {
             changed = iy != tooltipIndex_;
             show_tooltip(iy);
             return changed;
@@ -451,7 +453,7 @@ public class NodeGui implements NodeListener, NodeInterface {
             Product[] products = new Product[incomingConnections.size()];
             boolean isComplete = true;
             int i = 0;
-            for (int index: incomingConnections.keySet()) {
+            for (int index : incomingConnections.keySet()) {
                 products[i] = incomingConnections.get(index).getProduct();
                 if (products[i] == null) {
                     isComplete = false;
@@ -472,13 +474,16 @@ public class NodeGui implements NodeListener, NodeInterface {
 
     private void incomplete() {
         output = null;
-        NotificationManager.getInstance().warning(this.getName(), "Some input products are missing. Node can not be validated");
+        NotificationManager.getInstance().warning(this.getName(),
+                "Some input products are missing. Node can not be validated");
         validationStatus = ValidationStatus.WARNING;
     }
 
     private boolean isComplete() {
-        if (this.metadata.getMinNumberOfInputs() == 0) return true;
-        if (this.incomingConnections.size() == 0 && this.metadata.hasSourceProducts()) return false;
+        if (this.metadata.getMinNumberOfInputs() == 0)
+            return true;
+        if (this.incomingConnections.size() == 0 && this.metadata.hasSourceProducts())
+            return false;
         // check that all mandatory inputs are connected
         for (String inputName : this.metadata.getMandatoryInputs()) {
             int index = this.metadata.getInputIndex(inputName);
@@ -497,17 +502,18 @@ public class NodeGui implements NodeListener, NodeInterface {
 
         // setting inputs
 
-        for (int i: incomingConnections.keySet()){
+        for (int i : incomingConnections.keySet()) {
             String sourceName = metadata.getInputName(i);
             Product p = incomingConnections.get(i).getProduct();
             if (p == null) {
                 incomplete();
                 return;
             }
-            NotificationManager.getInstance().info(this.getName(), "source: "+sourceName);
-            context.setSourceProduct(sourceName, p);
+            NotificationManager.getInstance().info(this.getName(), "source: " + sourceName);
+            setOperatorSourceProduct(sourceName,p);
+
         }
-            
+
         operatorUI.updateParameters();
 
         recomputeOutputNeeded = false;
@@ -519,21 +525,21 @@ public class NodeGui implements NodeListener, NodeInterface {
                 this.operatorUI.convertToDOM(config);
                 node.setConfiguration(config);
             } catch (GraphException e) {
-                NotificationManager.getInstance().error(this.getName(), "could not retrieve configuration `" + e.getMessage() + "`" );
+                NotificationManager.getInstance().error(this.getName(),
+                        "could not retrieve configuration `" + e.getMessage() + "`");
                 validationStatus = ValidationStatus.ERROR;
             }
 
             NotificationManager.getInstance().info(this.getName(), "setting parameters");
-            for (String param: configuration.keySet()) {
-                context.setParameter(param, configuration.get(param));
+            for (String param : configuration.keySet()) {
+                setOperatorParameter(param,configuration.get(param));
             }
             try {
                 NotificationManager.getInstance().info(this.getName(), "validating");
-                output = context.getTargetProduct();
+                output = (Product)getTargetProduct();
                 NotificationManager.getInstance().ok(this.getName(), "Validated");
                 validationStatus = ValidationStatus.VALIDATED;
             } catch (Exception e) {
-                e.printStackTrace();
                 NotificationManager.getInstance().error(this.getName(), e.getMessage());
                 output = null;
                 validationStatus = ValidationStatus.ERROR;
@@ -551,6 +557,47 @@ public class NodeGui implements NodeListener, NodeInterface {
             }
         }
 
+    }
+
+    /**
+     * set Operator context parameter with java reflectivity
+    */
+    private void setOperatorParameter(String name, Object param) {
+        try {
+            Method contextMethod = operator.getClass().getMethod("setParameter",String.class,Object.class);
+            contextMethod.setAccessible(true);
+            contextMethod.invoke(operator,name, param);
+        } catch (Exception e) {
+            NotificationManager.getInstance().error(this.getName(), "Unable to set parameter");
+        }
+    }
+
+    /**
+     * set Operator context source product with java reflectivity
+    */
+    private void setOperatorSourceProduct(String name, Product product) {
+        try {
+            Method contextMethod = operator.getClass().getMethod("setSourceProduct",String.class,Product.class);
+            contextMethod.setAccessible(true);
+            contextMethod.invoke(operator,name, product);
+        } catch (Exception e) {
+            String msg = "Unable to set source product ";
+            NotificationManager.getInstance().error(this.getName(), msg);
+        }
+    }
+
+    /**
+     * set Operator target product with java reflectivity
+    */
+    private Object getTargetProduct() throws Exception {
+        try {
+            Method contextMethod = operator.getClass().getMethod("getTargetProduct");
+            contextMethod.setAccessible(true);
+            return contextMethod.invoke(operator);
+        }catch (Exception e) {
+            String msg = "Unable to get Target Product";
+            throw new Exception(msg);
+        }
     }
 
     @Override

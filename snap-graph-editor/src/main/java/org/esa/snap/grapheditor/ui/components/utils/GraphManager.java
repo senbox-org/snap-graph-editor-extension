@@ -368,7 +368,7 @@ public class GraphManager implements NodeListener {
         }
         Operator operator = GraphManager.getInstance().getOperator(metadata);
         assert operator != null;
-        NodeGui newNode = new NodeGui(node, getConfiguration(node), metadata, ui, operator.getContext());
+        NodeGui newNode = new NodeGui(node, getConfiguration(node), metadata, ui, operator);
         this.nodes.add(newNode);
         newNode.addNodeListener(this);
         NotificationManager.getInstance().info(newNode.getName(), "Created");
@@ -676,7 +676,7 @@ public class GraphManager implements NodeListener {
                         OperatorUI ui = OperatorUIRegistry.CreateOperatorUI(meta.getName());
                         Operator operator = GraphManager.getInstance().getOperator(meta);
                         assert operator != null;
-                        NodeGui ng = new NodeGui(copyNode(n), getConfiguration(n), meta, ui, operator.getContext());
+                        NodeGui ng = new NodeGui(copyNode(n), getConfiguration(n), meta, ui, operator);
                         nodes.add(ng);
                     } else {
                         NotificationManager.getInstance().error("Graph",
