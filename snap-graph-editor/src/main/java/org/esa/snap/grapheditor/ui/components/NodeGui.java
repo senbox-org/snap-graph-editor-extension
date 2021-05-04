@@ -1,19 +1,24 @@
 package org.esa.snap.grapheditor.ui.components;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.javatuples.Pair;
 
 import javax.swing.JComponent;
 
 import com.bc.ceres.binding.dom.XppDomElement;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
+
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.Node;
@@ -23,9 +28,12 @@ import org.esa.snap.grapheditor.gpf.ui.OperatorUI;
 import org.esa.snap.grapheditor.gpf.ui.UIValidation;
 import org.esa.snap.grapheditor.ui.components.interfaces.NodeInterface;
 import org.esa.snap.grapheditor.ui.components.interfaces.NodeListener;
-import org.esa.snap.grapheditor.ui.components.utils.*;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.esa.snap.grapheditor.ui.components.utils.Constants;
+import org.esa.snap.grapheditor.ui.components.utils.GraphManager;
+import org.esa.snap.grapheditor.ui.components.utils.GraphicalUtils;
+import org.esa.snap.grapheditor.ui.components.utils.NotificationManager;
+import org.esa.snap.grapheditor.ui.components.utils.UnifiedMetadata;
+import org.javatuples.Pair;
 
 /**
  * NodeGui is the main component of the GraphBuilder and it represents a node
@@ -111,7 +119,7 @@ public class NodeGui implements NodeListener, NodeInterface {
      * @param operatorUI    operator properties ui
      * @param context       execution context
      */
-    public NodeGui(Node node, Map<String, Object> configuration, @NotNull UnifiedMetadata metadata,
+    public NodeGui(Node node, Map<String, Object> configuration, UnifiedMetadata metadata,
             OperatorUI operatorUI, Operator operator) {
         this.x = 0;
         this.y = 0;
@@ -127,7 +135,7 @@ public class NodeGui implements NodeListener, NodeInterface {
     }
 
     @Override
-    public void drawNode(@NotNull Graphics2D g) {
+    public void drawNode(Graphics2D g) {
         g.setFont(textFont);
 
         if (textW <= 0) {
@@ -178,8 +186,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         }
     }
 
-    @NotNull
-    static private ArrayList<String> splitLine(@NotNull String line) {
+    static private ArrayList<String> splitLine(String line) {
         ArrayList<String> result = new ArrayList<>();
 
         if (line.length() <= MAX_LINE_LENGTH) {
@@ -201,7 +208,6 @@ public class NodeGui implements NodeListener, NodeInterface {
         return result;
     }
 
-    @Contract("null -> null")
     static private String[] split_text(String input) {
         if (input == null)
             return null;
@@ -278,7 +284,6 @@ public class NodeGui implements NodeListener, NodeInterface {
         }
     }
 
-    @Contract(pure = true)
     private int numInputs() {
         return numInputs;
     }
@@ -336,7 +341,7 @@ public class NodeGui implements NodeListener, NodeInterface {
     }
 
     @Override
-    public void setPosition(@NotNull Point p) {
+    public void setPosition(Point p) {
         this.x = p.x;
         this.y = p.y;
     }
@@ -358,7 +363,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         return name;
     }
 
-    private int getInputIndex(@NotNull Point p) {
+    private int getInputIndex(Point p) {
         int dx = p.x - x;
         int dy = p.y - y;
         if (Math.abs(dx) <= connectionHalfSize && dy > 0) {
@@ -373,7 +378,7 @@ public class NodeGui implements NodeListener, NodeInterface {
         return -1;
     }
 
-    private boolean isOverOutput(@NotNull Point p) {
+    private boolean isOverOutput(Point p) {
         int dx = p.x - x;
         int dy = p.y - y;
         return (metadata.hasOutput() && Math.abs(dx - width) <= connectionHalfSize
@@ -386,7 +391,7 @@ public class NodeGui implements NodeListener, NodeInterface {
      * @param p point
      * @return if the point is inside the NodeGui body
      */
-    public boolean contains(@NotNull Point p) {
+    public boolean contains(Point p) {
         int dx = p.x - x;
         int dy = p.y - y;
         boolean inside = (dx >= 0 && dy >= 0 && dx <= width && dy <= height);
@@ -577,11 +582,6 @@ public class NodeGui implements NodeListener, NodeInterface {
      * set Operator context source product with java reflectivity
     */
     private void setOperatorSourceProduct(String name, Product product) {
-
-        OperatorParameterSupport parameterSupport = new OperatorParameterSupport(metadata);
-        // final HashMap<String, Product> sourceProducts = ioParametersPanel.createSourceProductsMap();
-        System.out.println("operator.getClass().toString() : "+operator.getClass().toString());
-        GPF.createProduct(operator.getClass().toString(), parameterSupport.getParameterMap(), sourceProducts);
 
         try {
             Method contextMethod = operator.getClass().getMethod("setSourceProduct",String.class,Product.class);

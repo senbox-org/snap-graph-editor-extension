@@ -1,7 +1,6 @@
 package org.esa.snap.grapheditor.ui.components.interfaces;
 
 import org.esa.snap.core.datamodel.Product;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -121,7 +120,7 @@ public interface NodeInterface {
      * Set current node position.
      * @param p node position
      */
-    void setPosition(@NotNull Point p);
+    void setPosition(Point p);
 
     /**
      * Returns the area to be repainted.

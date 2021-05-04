@@ -1,7 +1,5 @@
 package org.esa.snap.grapheditor.ui.components.utils;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
@@ -19,7 +17,6 @@ public class GraphKeyEventDispatcher implements KeyEventDispatcher {
      * Create the dispatcher and set the default key listener.
      * @param listener default key listener
      */
-    @Contract(pure = true)
     public GraphKeyEventDispatcher(KeyListener listener){
         defaultListener = listener;
     }
@@ -31,7 +28,7 @@ public class GraphKeyEventDispatcher implements KeyEventDispatcher {
      * @return if the KeyEvent has been managed or not
      */
     @Override
-    public boolean dispatchKeyEvent(@NotNull KeyEvent event) {
+    public boolean dispatchKeyEvent(KeyEvent event) {
         if (defaultListener == event.getSource()) {
             switch(event.getID()) {
                 case (KeyEvent.KEY_RELEASED):

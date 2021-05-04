@@ -1,6 +1,5 @@
 package org.esa.snap.grapheditor.ui.components.utils;
 
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Simple notification class, with priority level.
@@ -33,7 +32,7 @@ public class Notification {
      * @param message error message
      * @return the notification
      */
-    static public Notification error(@NotNull String source, @NotNull String message) {
+    static public Notification error(String source, String message) {
         return new Notification(Level.error, source, message);
     }
 
@@ -44,7 +43,7 @@ public class Notification {
      * @param message warning message
      * @return the notification
      */
-    static public Notification warning(@NotNull String source, @NotNull String message) {
+    static public Notification warning(String source, String message) {
         return new Notification(Level.warning, source, message);
     }
 
@@ -55,7 +54,7 @@ public class Notification {
      * @param message congratulation message :)
      * @return the notification
      */
-    static public Notification ok(@NotNull String source, @NotNull String message) {
+    static public Notification ok(String source, String message) {
         return new Notification(Level.ok, source, message);
     }
 
@@ -65,7 +64,7 @@ public class Notification {
      * @param message message
      * @return the notification
      */
-    static Notification info(@NotNull String source, @NotNull String message) {
+    static Notification info(String source, String message) {
         return new Notification(Level.info, source, message);
     }
 
