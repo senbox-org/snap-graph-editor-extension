@@ -13,6 +13,7 @@ import javax.swing.JComponent;
 import com.bc.ceres.binding.dom.XppDomElement;
 import com.thoughtworks.xstream.io.xml.xppdom.XppDom;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.Node;
@@ -576,6 +577,12 @@ public class NodeGui implements NodeListener, NodeInterface {
      * set Operator context source product with java reflectivity
     */
     private void setOperatorSourceProduct(String name, Product product) {
+
+        OperatorParameterSupport parameterSupport = new OperatorParameterSupport(metadata);
+        // final HashMap<String, Product> sourceProducts = ioParametersPanel.createSourceProductsMap();
+        System.out.println("operator.getClass().toString() : "+operator.getClass().toString());
+        GPF.createProduct(operator.getClass().toString(), parameterSupport.getParameterMap(), sourceProducts);
+
         try {
             Method contextMethod = operator.getClass().getMethod("setSourceProduct",String.class,Product.class);
             contextMethod.setAccessible(true);
