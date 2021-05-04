@@ -17,7 +17,7 @@ package org.esa.snap.grapheditor.gpf.panels.support;
 
 import org.esa.snap.engine_utilities.util.ProductFunctions;
 import org.esa.snap.grapheditor.gpf.utils.ClipboardUtils;
-import org.esa.snap.productlibrary.db.ProductEntry;
+
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.nodes.PNode;
 import org.esa.snap.rcp.util.Dialogs;
@@ -67,7 +67,7 @@ public class FileTable extends JTable {
     @Override
     public String getToolTipText(MouseEvent e) {
         String tip = null;
-        Point p = e.getPoint();
+        java.awt.Point p = e.getPoint();
         int rowIndex = rowAtPoint(p);
         int colIndex = columnAtPoint(p);
 
@@ -118,7 +118,11 @@ public class FileTable extends JTable {
     private JPopupMenu createTablePopup() {
         final JPopupMenu popup = new JPopupMenu();
         final JMenuItem pastelItem = new JMenuItem("Paste");
-        pastelItem.addActionListener(e -> paste());
+        pastelItem.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+                paste();
+            }
+        });
         popup.add(pastelItem);
 
         return popup;
@@ -127,10 +131,13 @@ public class FileTable extends JTable {
     private void paste() {
         try {
             final File[] fileList = ClipboardUtils.getClipboardFileList();
-            setFiles(fileList);
+            if (fileList != null) {
+                setFiles(fileList);
+            }
         } catch (Exception e) {
-            SnapApp.getDefault();
-            Dialogs.showError("Unable to paste from clipboard: " + e.getMessage());
+            if (SnapApp.getDefault() != null) {
+                Dialogs.showError("Unable to paste from clipboard: " + e.getMessage());
+            }
         }
     }
 
@@ -143,7 +150,7 @@ public class FileTable extends JTable {
         }
 
         @Override
-        public boolean canImport(TransferSupport info) {
+        public boolean canImport(TransferHandler.TransferSupport info) {
             if(info.isDataFlavorSupported(DataFlavor.stringFlavor))
                 return true;
             try {
@@ -181,7 +188,7 @@ public class FileTable extends JTable {
          * Perform the actual import
          */
         @Override
-        public boolean importData(TransferSupport info) {
+        public boolean importData(TransferHandler.TransferSupport info) {
             if (!info.isDrop()) {
                 return false;
             }
@@ -228,6 +235,11 @@ public class FileTable extends JTable {
                         }
                     }
                 }
+
+                if(fileModel.getRowCount() < 100) {
+                    fileModel.refresh();
+                }
+
             } catch (Exception e) {
                 return false;
             }

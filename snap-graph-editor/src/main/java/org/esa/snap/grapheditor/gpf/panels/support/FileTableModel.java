@@ -15,8 +15,6 @@
  */
 package org.esa.snap.grapheditor.gpf.panels.support;
 
-import org.esa.snap.productlibrary.db.ProductEntry;
-
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import java.io.File;
@@ -27,8 +25,6 @@ import java.io.File;
 public interface FileTableModel extends TableModel {
 
     void addFile(final File file);
-
-    void addFile(final ProductEntry entry);
 
     void removeFile(final int index);
 
@@ -41,6 +37,8 @@ public interface FileTableModel extends TableModel {
     void setColumnWidths(final TableColumnModel columnModel);
 
     File getFileAt(final int index);
+
+    File[] getFilesAt(final int[] indices);
 
     int getIndexOf(final File file);
 

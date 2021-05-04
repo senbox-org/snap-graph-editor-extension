@@ -17,10 +17,7 @@ package org.esa.snap.grapheditor.gpf.panels.support;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.engine_utilities.gpf.CommonReaders;
-import org.esa.snap.productlibrary.db.ProductDB;
-import org.esa.snap.productlibrary.db.ProductEntry;
 import org.esa.snap.rcp.SnapApp;
-import org.esa.snap.rcp.util.Dialogs;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -31,9 +28,9 @@ import java.util.List;
 
 public abstract class BaseFileModel extends AbstractTableModel implements FileTableModel {
 
-    protected String[] titles = null;
-    protected Class[] types = null;
-    protected int[] widths = null;
+    protected String titles[] = null;
+    protected Class types[] = null;
+    protected int widths[] = null;
 
     protected final List<File> fileList = new ArrayList<>(10);
     private final List<TableData> dataList = new ArrayList<>(10);
@@ -47,41 +44,24 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
 
     protected abstract TableData createFileStats(final File file);
 
-    protected abstract TableData createFileStats(final ProductEntry entry);
-
     public File[] getFileList() {
-        return fileList.toArray(new File[0]);
-    }
-
-    private static ProductEntry getProductEntry(final File file) {
-        try {
-            return ProductDB.instance().getProductEntry(file);
-        } catch (Exception e) {
-            SnapApp.getDefault();
-            Dialogs.showError("Error getting product entry: " + e.getMessage());
-        }
-        return null;
+        return fileList.toArray(new File[fileList.size()]);
     }
 
     public void addFile(final File file) {
         fileList.add(file);
         clearBlankFile();
 
-        // check if already exists in db
-        final ProductEntry existingEntry = file.getName().isEmpty() ? null : getProductEntry(file);
-        if (existingEntry != null) {
-            dataList.add(createFileStats(existingEntry));
-        } else {
-            dataList.add(createFileStats(file));
-        }
+        dataList.add(createFileStats(file));
         fireTableDataChanged();
     }
 
-    public void addFile(final ProductEntry entry) {
-        fileList.add(entry.getFile());
+    public void addFile(final File file, final String[] values) {
+        fileList.add(file);
         clearBlankFile();
 
-        dataList.add(createFileStats(entry));
+        dataList.add(new TableData(values));
+
         fireTableDataChanged();
     }
 
@@ -167,6 +147,14 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
         return fileList.get(index);
     }
 
+    public File[] getFilesAt(final int[] indices) {
+        final List<File> files = new ArrayList<>(indices.length);
+        for (int i : indices) {
+            files.add(fileList.get(i));
+        }
+        return files.toArray(new File[files.size()]);
+    }
+
     public void setColumnWidths(final TableColumnModel columnModel) {
         for (int i = 0; i < widths.length; ++i) {
             columnModel.getColumn(i).setMinWidth(widths[i]);
@@ -176,20 +164,17 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
     }
 
     public class TableData {
-        protected final String[] data = new String[titles.length];
+        protected final String data[] = new String[titles.length];
         protected final File file;
-        protected final ProductEntry entry;
 
         public TableData(final File file) {
             this.file = file;
-            this.entry = null;
             updateData();
         }
 
-        public TableData(final ProductEntry entry) {
+        TableData(final String[] values) {
+            System.arraycopy(values, 0, data, 0, data.length);
             this.file = null;
-            this.entry = entry;
-            updateData();
         }
 
         public void refresh() {
@@ -207,9 +192,9 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
             if(file == null)
                 return;
 
-            final SwingWorker<Boolean, Object> worker = new SwingWorker<Boolean, Object>() {
+            final SwingWorker worker = new SwingWorker() {
                 @Override
-                protected Boolean doInBackground() throws Exception {
+                protected Object doInBackground() throws Exception {
                     try {
                         if (!file.getName().isEmpty()) {
                             try {
@@ -225,7 +210,7 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
                     } finally {
                         fireTableDataChanged();
                     }
-                    return true;
+                    return null;
                 }
             };
             worker.execute();
@@ -233,10 +218,12 @@ public abstract class BaseFileModel extends AbstractTableModel implements FileTa
 
         Product getProductFromProductManager(final File file) {
             final SnapApp app = SnapApp.getDefault();
-            final Product[] products = app.getProductManager().getProducts();
-            for(Product p : products) {
-                if(file.equals(p.getFileLocation())) {
-                    return p;
+            if(app != null) {
+                final Product[] products = app.getProductManager().getProducts();
+                for(Product p : products) {
+                    if(file.equals(p.getFileLocation())) {
+                        return p;
+                    }
                 }
             }
             return null;
