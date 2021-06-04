@@ -8,6 +8,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.esa.snap.engine_utilities.util.ResourceUtils;
 import org.esa.snap.grapheditor.ui.components.MainPanel;
 import org.esa.snap.grapheditor.ui.components.StatusPanel;
 import org.esa.snap.grapheditor.ui.components.interfaces.GraphListener;
@@ -61,16 +62,19 @@ public class GraphBuilder extends JPanel implements GraphListener {
         ImageIcon settingIcon = TangoIcons.categories_preferences_system(TangoIcons.Res.R22);
         settingsButton.setIcon(settingIcon);
         settingsButton.addActionListener(e -> SettingManager.getInstance().showSettingsDialog(parentWindow));
+        settingsButton.setToolTipText("Settings");
 
         JButton runButton = new JButton();
         ImageIcon runIcon = TangoIcons.actions_media_playback_start(TangoIcons.R22);
         runButton.setIcon(runIcon);
         runButton.addActionListener(e -> GraphManager.getInstance().evaluate());
+        runButton.setToolTipText("Run");
 
         saveButton = new JButton();
         ImageIcon saveIcon = TangoIcons.actions_document_save(TangoIcons.R22);
         saveButton.setIcon(saveIcon);
         saveButton.addActionListener(e -> saveGraph());
+        saveButton.setToolTipText("Save graph");
 
         saveAsButton = new JButton();
         ImageIcon saveAsIcon = TangoIcons.actions_document_save_as(TangoIcons.R22);
@@ -81,7 +85,7 @@ public class GraphBuilder extends JPanel implements GraphListener {
                 saveGraph();
             }
         });
-
+        saveAsButton.setToolTipText("Save as graph");
         saveAsButton.setEnabled(false);
         saveButton.setEnabled(false);
 
@@ -93,7 +97,8 @@ public class GraphBuilder extends JPanel implements GraphListener {
             if (confirmClean()) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("Graph XML file", "xml"));
-                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                fileChooser.setCurrentDirectory(ResourceUtils.getGraphFolder("").toFile());
+                fileChooser.setFileHidingEnabled(false);
                 int result = fileChooser.showOpenDialog(this);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
@@ -102,6 +107,7 @@ public class GraphBuilder extends JPanel implements GraphListener {
                 }
             }
         });
+        openButton.setToolTipText("Open graph");
 
         JButton newButton = new JButton();
         ImageIcon newIcon = TangoIcons.actions_document_new(TangoIcons.R22);
@@ -111,6 +117,7 @@ public class GraphBuilder extends JPanel implements GraphListener {
                 newGraph();
             }
         });
+        newButton.setToolTipText("New graph");
 
         toolBar.setFloatable(false);
         toolBar.add(newButton);
